@@ -1,44 +1,46 @@
-influxdb:
-  image: influxdb:latest
-  container_name: influxdb
-  ports:
-    - "8083:8083"
-    - "8086:8086"
-    - "8090:8090"
-  command: -config /etc/influxdb/influxdb.conf
-  volumes:
-    - ./influxdb:/var/lib/influxdb
-    - ./influxdb.conf:/etc/influxdb/influxdb.conf:ro
+version: '2'
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+    command: -config /etc/influxdb/influxdb.conf
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+      - ./influxdb.conf:/etc/influxdb/influxdb.conf:ro
 
-cadvisor:
-  image: google/cadvisor:latest
-  container_name: cadvisor
-  ports:
-    - "8080:8080"
-  command: -storage_driver=influxdb -storage_driver_host=influxdb:8086
-  volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-  links:
-    - influxdb
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    command: -storage_driver=influxdb -storage_driver_host=influxdb:8086
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - influxdb
 
-telegraf:
-  image: telegraf:latest
-  container_name: telegraf
-  links:
-    - influxdb
-  volumes:
-    - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    depends_on:
+      - influxdb
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
-grafana:
-  image: grafana/grafana:latest
-  container_name: grafana
-  ports:
-    - "3000:3000"
-  links:
-    - influxdb
-  volumes:
-    - ./grafana:/var/lib/grafana
-    - ./grafana_config:/etc/grafana/
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana_config:/etc/grafana/
