@@ -1,5 +1,27 @@
 version: '2'
 services:
+  redis:
+    image: redis:3
+    container_name: redis-mosquitto
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./mosquitto/redis_data:/data
+
+  mosquitto:
+    image: jllopis/mosquitto:v1.4.10
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9883:9883"
+    depends_on:
+      - redis
+    volumes:
+      - ./mosquitto/etc/mosquitto:/etc/mosquitto
+      - ./mosquitto/etc/mosquitto.d:/etc/mosquitto.d
+      - ./mosquitto/var/lib/mosquitto:/var/lib/mosquitto
+      - ./mosquitto/auth-plugin.conf:/etc/mosquitto.d/auth-plugin.conf
+
   influxdb:
     image: influxdb:latest
     container_name: influxdb
@@ -31,8 +53,10 @@ services:
     container_name: telegraf
     depends_on:
       - influxdb
+      - mosquitto
     volumes:
       - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/:/var/run:rw
 
   grafana:
     image: grafana/grafana:latest
