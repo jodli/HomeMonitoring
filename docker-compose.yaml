@@ -34,20 +34,6 @@ services:
       - ./influxdb:/var/lib/influxdb
       - ./influxdb.conf:/etc/influxdb/influxdb.conf:ro
 
-  cadvisor:
-    image: google/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8080:8080"
-    command: -storage_driver=influxdb -storage_driver_host=influxdb:8086
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    depends_on:
-      - influxdb
-
   telegraf:
     image: telegraf:latest
     container_name: telegraf
