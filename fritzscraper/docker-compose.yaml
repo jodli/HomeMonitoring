@@ -5,3 +5,4 @@ services:
     container_name: python-fritzscraper
     volumes:
       - ./src:/src
+    command: sh /src/startup.sh
