@@ -1,0 +1,2 @@
+fritzconnection>=0.4.6
+paho-mqtt>=1.2

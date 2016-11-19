@@ -1,0 +1,7 @@
+version: '2'
+services:
+  python:
+    build: .
+    container_name: python-fritzscraper
+    volumes:
+      - ./src:/src
