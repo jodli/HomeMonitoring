@@ -23,9 +23,11 @@ class FritzScraper(object):
   def run(self):
     while not self._exit:
       print("Working...")
+
+      self._scraper.print_status()
+
       sys.stdout.flush()
-      time.sleep(1)
-      #self._scraper.print_status()
+      time.sleep(2)
 
   def close(self):
     print("Cleaning up...")

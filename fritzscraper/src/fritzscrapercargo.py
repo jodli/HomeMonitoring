@@ -1,10 +1,8 @@
 
-class FritzScraperCargo(object):
-  timestamp = 0.0
-  names = []
-  values = []
+import time
 
-  def __init__(self, timestamp, names, values):
-    self.timestamp = float(timestamp)
-    self.names = names
-    self.values = values
+class FritzScraperCargo(object):
+
+  def __init__(self, cargo):
+    self.timestamp = time.time()
+    self.cargo = cargo

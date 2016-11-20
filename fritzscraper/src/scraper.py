@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import fritzconnection as fc
+import fritzscrapercargo as fsc
 
 import time
 
@@ -66,7 +67,7 @@ class Scraper(object):
     return upstream, downstream
 
   @property
-  def max_bit_rate(self):
+  def max_bitrate(self):
     status = self.connection.call_action('WANCommonInterfaceConfig', 'GetCommonLinkProperties')
     downstream = status['NewLayer1DownstreamMaxBitRate']
     upstream = status['NewLayer1UpstreamMaxBitRate']
@@ -77,15 +78,27 @@ class Scraper(object):
     upstream, downstream = self.max_bit_rate
     return upstream / 8.0, downstream / 8.0
 
+  def update_data(self):
+    cargo = {}
+    cargo["modelname"] = self.modelname
+    cargo["is_linked"] = self.is_linked
+    cargo["is_connected"] = self.is_connected
+    cargo["wan_access_type"] = self.wan_access_type
+    cargo["external_ip"] = self.external_ip
+    cargo["uptime"] = self.uptime
+    cargo["bytes received"] = self.bytes_received
+    cargo["bytes sent"] = self.bytes_sent
+    transmission_rate_upstream, transmission_rate_downstream = self.transmission_rate
+    cargo["transmission_rate_upstream"] = transmission_rate_upstream
+    cargo["transmission_rate_downstream"] = transmission_rate_downstream
+    max_bitrate_upstream, max_bitrate_downstream = self.max_bitrate
+    cargo["max_bitrate_upstream"] = max_bitrate_upstream
+    cargo["max_bitrate_downstream"] = max_bitrate_downstream
+
+    self.fscargo = fsc.FritzScraperCargo(cargo)
+
   def print_status(self):
-    print('model: ' + self.modelname)
-    print('linked: ' + str(self.is_linked))
-    print('connected: ' + str(self.is_connected))
-    print('wan access: ' + self.wan_access_type)
-    print('external ip: ' + self.external_ip)
-    print('uptime: ' + str(self.uptime))
-    print('bytes sent: ' + str(self.bytes_sent))
-    print('bytes received: ' + str(self.bytes_received))
-    print('bytes received / s: ' + str(self.transmission_rate))
-    print('max bit rate: ' + str(self.max_bit_rate))
-    print('max byte rate: ' + str(self.max_byte_rate))
+    self.update_data()
+    print("time: " + str(self.fscargo.timestamp))
+    for name, value in self.fscargo.cargo.items():
+      print(name + ": " + str(value))
