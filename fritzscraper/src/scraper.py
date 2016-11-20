@@ -61,8 +61,10 @@ class Scraper(object):
 
   @property
   def transmission_rate(self):
-    sent = self.bytes_sent
-    received = self.bytes_received
+    # Convert to bits
+    sent = self.bytes_sent * 8
+    received = self.bytes_received * 8
+
     traffic_call = time.time()
     time_delta = traffic_call - self.last_traffic_call
     upstream = int(1.0 * (sent - self.last_bytes_sent)/time_delta)
@@ -85,14 +87,14 @@ class Scraper(object):
 
   def update_data(self):
     cargo = {}
-    cargo["modelname"] = self.modelname
-    cargo["is_linked"] = self.is_linked
-    cargo["is_connected"] = self.is_connected
-    cargo["wan_access_type"] = self.wan_access_type
-    cargo["external_ip"] = self.external_ip
+    #cargo["model_name"] = self.modelname
+    cargo["is_linked"] = int(self.is_linked)
+    cargo["is_connected"] = int(self.is_connected)
+    #cargo["wan_access_type"] = self.wan_access_type
+    #cargo["external_ip"] = self.external_ip
     cargo["uptime"] = self.uptime
-    cargo["bytes received"] = self.bytes_received
-    cargo["bytes sent"] = self.bytes_sent
+    cargo["bytes_received"] = self.bytes_received
+    cargo["bytes_sent"] = self.bytes_sent
     transmission_rate_upstream, transmission_rate_downstream = self.transmission_rate
     cargo["transmission_rate_upstream"] = transmission_rate_upstream
     cargo["transmission_rate_downstream"] = transmission_rate_downstream

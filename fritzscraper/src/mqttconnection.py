@@ -51,13 +51,11 @@ class MqttConnection(object):
       try:
         self._client.username_pw_set("emoncms", "FNnB6Qnr6Mgt7h2hYROA")
         self._client.connect(self._address, self._port, 60)
-        self._client.loop_start()
       except:
         print("Error connecting...")
-        self._client.loop_stop()
+      self._client.loop_start()
 
   def disconnect(self):
-    self._client.loop_stop()
     self._client.disconnect()
 
   def publish(self, fscargo):
@@ -69,8 +67,7 @@ class MqttConnection(object):
         payload = str(value)
 
         print("Publishing: " + topic + " " + payload)
-        #result = self._client.publish(topic, payload=payload, qos=2, retain=False)
-        result = 4
+        result, mid = self._client.publish(topic, payload=payload, qos=2, retain=False)
 
         if result == 4:
-          print("Publishing error")
+          print("Publishing error with id: " + str(mid))

@@ -5,7 +5,7 @@ import signal
 import sys
 import time
 
-INTERVAL = 2.0
+INTERVAL = 5.0
 
 class FritzScraper(object):
 
@@ -22,13 +22,9 @@ class FritzScraper(object):
 
   def run(self):
     while not self._exit:
-      if not self._mqttConnection._connected:
-        self._mqttConnection.connect()
-      else:
-        fscargo = self._scraper.get_cargo()
-        self._mqttConnection.publish(fscargo)
-
-        self._exit = True
+      self._mqttConnection.connect()
+      fscargo = self._scraper.get_cargo()
+      self._mqttConnection.publish(fscargo)
 
       print("Sleep for " + str(INTERVAL) + "s")
       sys.stdout.flush()
@@ -46,7 +42,6 @@ if __name__ == '__main__':
   except Exception as e:
     sys.exit("Could not create FritzScraper: " + str(e))
   else:
-    print("Start scraping...")
     fritzScraper.run()
 
     fritzScraper.close()
