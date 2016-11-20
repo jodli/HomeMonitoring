@@ -10,6 +10,12 @@ FRITZ_TCP_PORT = 49000
 
 class Scraper(object):
 
+  connection = None
+  last_bytes_sent = 0
+  last_bytes_received = 0
+  last_traffic_call = 0.0
+  fscargo = {}
+
   def __init__(self, address=FRITZ_IP_ADDRESS, port=FRITZ_TCP_PORT):
     connection = fc.FritzConnection(address=address, port=port)
     print("Connected to FritzBox")
@@ -73,10 +79,9 @@ class Scraper(object):
     upstream = status['NewLayer1UpstreamMaxBitRate']
     return upstream, downstream
 
-  @property
-  def max_byte_rate(self):
-    upstream, downstream = self.max_bit_rate
-    return upstream / 8.0, downstream / 8.0
+  def get_cargo(self):
+    self.update_data()
+    return self.fscargo
 
   def update_data(self):
     cargo = {}
@@ -98,7 +103,6 @@ class Scraper(object):
     self.fscargo = fsc.FritzScraperCargo(cargo)
 
   def print_status(self):
-    self.update_data()
     print("time: " + str(self.fscargo.timestamp))
     for name, value in self.fscargo.cargo.items():
       print(name + ": " + str(value))

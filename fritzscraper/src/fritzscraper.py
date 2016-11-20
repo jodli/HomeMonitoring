@@ -5,6 +5,8 @@ import signal
 import sys
 import time
 
+INTERVAL = 2.0
+
 class FritzScraper(object):
 
   def __init__(self):
@@ -12,9 +14,7 @@ class FritzScraper(object):
     signal.signal(signal.SIGTERM, self._sigterm_handler)
 
     self._scraper = fs.Scraper()
-    #self._mqttConnection = mqtt.MqttConnection()
-
-    #self._mqttConnection.connect()
+    self._mqttConnection = mqtt.MqttConnection()
 
   def _sigterm_handler(self, signal, frame):
     print("SIGTERM received")
@@ -22,15 +22,21 @@ class FritzScraper(object):
 
   def run(self):
     while not self._exit:
-      print("Working...")
+      if not self._mqttConnection._connected:
+        self._mqttConnection.connect()
+      else:
+        fscargo = self._scraper.get_cargo()
+        self._mqttConnection.publish(fscargo)
 
-      self._scraper.print_status()
+        self._exit = True
 
+      print("Sleep for " + str(INTERVAL) + "s")
       sys.stdout.flush()
-      time.sleep(2)
+      time.sleep(INTERVAL)
 
   def close(self):
     print("Cleaning up...")
+    self._mqttConnection.disconnect()
 
 if __name__ == '__main__':
 
@@ -38,7 +44,7 @@ if __name__ == '__main__':
     print("Creating FritzScraper...")
     fritzScraper = FritzScraper()
   except Exception as e:
-    sys.exit("Could not start FritzScraper: " + str(e))
+    sys.exit("Could not create FritzScraper: " + str(e))
   else:
     print("Start scraping...")
     fritzScraper.run()
