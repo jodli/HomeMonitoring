@@ -1,2 +1,4 @@
 grafana
 influxdb
+*.swp
+*.pyc
