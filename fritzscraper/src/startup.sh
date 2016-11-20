@@ -2,4 +2,4 @@
 
 pip install -r requirements.txt --upgrade
 
-python fritzscraper.py
+python scraper.py
