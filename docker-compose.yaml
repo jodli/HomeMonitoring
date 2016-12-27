@@ -22,6 +22,42 @@ services:
       - ./mosquitto/var/lib/mosquitto:/var/lib/mosquitto
       - ./mosquitto/auth-plugin.conf:/etc/mosquitto.d/auth-plugin.conf
 
+  nginx:
+    build: ./nginx-image
+    container_name: nginx
+    environment:
+      - MY_DOMAIN_NAME=5wodf3rbojgxdiqe.myfritz.net
+      - LETSENCRYPT_PORT_80_TCP_ADDR=letsencrypt
+      - LETSENCRYPT_PORT_80_TCP_PORT=80
+      - LETSENCRYPT_PORT_443_TCP_ADDR=letsencrypt
+      - LETSENCRYPT_PORT_443_TCP_PORT=443
+      - APP_PORT_80_TCP_ADDR=grafana
+      - APP_PORT_80_TCP_PORT=3000
+    mem_limit: 2g
+    cpu_shares: 256
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - letsencrypt
+      - grafana
+    volumes_from:
+      - letsencrypt
+
+  letsencrypt:
+    image: quay.io/letsencrypt/letsencrypt:latest
+    container_name: letsencrypt
+    command: bash -c "sleep 6 && certbot certonly --staging --standalone -d 5wodf3rbojgxdiqe.myfritz.net --text --agree-tos --email job87@web.de --server https://acme-v01.api.letsencrypt.org/directory --rsa-key-size 4096 --verbose --renew-by-default --standalone-supported-challenges http-01"
+    entrypoint: ""
+    volumes:
+      - /etc/letsencrypt
+      - /var/lib/letsencrypt
+    ports:
+      - "80"
+      - "443"
+    environment:
+      - "TERM:xterm"
+
   influxdb:
     image: influxdb:latest
     container_name: influxdb
